@@ -2,6 +2,21 @@ const fs = require('fs');
 const path = require('path');
 const { remote } = require('webdriverio');
 
+function buildCapabilities(deviceName, osVersion) {
+  return {
+    platformName: 'Android',
+    browserName: 'Chrome',
+    'appium:deviceName': deviceName,
+    'appium:platformVersion': osVersion,
+    'appium:automationName': 'UiAutomator2',
+    'bstack:options': {
+      projectName: process.env.BROWSERSTACK_PROJECT_NAME || 'Device Screenshot Runner',
+      buildName: process.env.BROWSERSTACK_BUILD_NAME || 'GitHub Actions Run',
+      sessionName: `Screenshots - ${deviceName} (${osVersion})`
+    }
+  };
+}
+
 async function run() {
   const username = process.env.BROWSERSTACK_USERNAME;
   const accessKey = process.env.BROWSERSTACK_ACCESS_KEY;
@@ -26,17 +41,7 @@ async function run() {
     path: '/wd/hub',
     user: username,
     key: accessKey,
-    capabilities: {
-      platformName: 'Android',
-      'appium:deviceName': deviceName,
-      'appium:platformVersion': osVersion,
-      'appium:automationName': 'UiAutomator2',
-      'bstack:options': {
-        projectName: process.env.BROWSERSTACK_PROJECT_NAME || 'Device Screenshot Runner',
-        buildName: process.env.BROWSERSTACK_BUILD_NAME || 'GitHub Actions Run',
-        sessionName: `Screenshots - ${deviceName} (${osVersion})`
-      }
-    }
+    capabilities: buildCapabilities(deviceName, osVersion)
   });
 
   try {
@@ -69,7 +74,11 @@ async function run() {
   }
 }
 
-run().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
+
+module.exports = { buildCapabilities, run };

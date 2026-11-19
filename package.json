@@ -4,6 +4,7 @@
   "description": "Launch a real device on BrowserStack Automate from GitHub Actions and capture screenshots",
   "main": "test/take-screenshots.js",
   "scripts": {
+    "test": "node --test test/*.test.js",
     "test:screenshots": "node test/take-screenshots.js"
   },
   "dependencies": {
