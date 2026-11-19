@@ -1,0 +1,55 @@
+name: BrowserStack Device Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      device_name:
+        description: 'BrowserStack real device name'
+        required: false
+        default: 'Google Pixel 8'
+      os_version:
+        description: 'OS version'
+        required: false
+        default: '14.0'
+      target_url:
+        description: 'URL to open on the device'
+        required: false
+        default: 'https://example.com'
+  push:
+    branches: [main]
+
+jobs:
+  capture-screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure BrowserStack environment
+        uses: browserstack/github-actions/setup-env@master
+        with:
+          username: ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+
+      - name: Launch device and capture screenshots
+        env:
+          BS_DEVICE_NAME: ${{ inputs.device_name || 'Google Pixel 8' }}
+          BS_OS_VERSION: ${{ inputs.os_version || '14.0' }}
+          TARGET_URL: ${{ inputs.target_url || 'https://example.com' }}
+        run: npm run test:screenshots
+
+      - name: Upload screenshots artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: device-screenshots
+          path: screenshots/*.png
