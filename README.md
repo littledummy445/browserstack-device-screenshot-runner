@@ -1,0 +1,1 @@
+# browserstack-device-screenshot-runner
